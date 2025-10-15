@@ -22,7 +22,6 @@ return new class extends Migration
             $table->timestamps();
 
             $table->index('key');
-            $table->index('content');
 
             $table->foreign('language_id')->references('id')->on('languages')->onDelete('cascade');
             $table->unique(['key', 'locale']);

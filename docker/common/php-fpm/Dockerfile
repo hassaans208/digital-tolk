@@ -112,7 +112,7 @@ RUN curl -o /usr/local/bin/php-fpm-healthcheck \
     && chmod +x /usr/local/bin/php-fpm-healthcheck
 
 # Copy the initialization script
-COPY ./docker/php-fpm/entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY ./docker/production/php-fpm/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
 # Copy PHP extensions and libraries from the builder stage
@@ -137,13 +137,15 @@ RUN groupadd -g 1000 www && \
     useradd -u 1000 -ms /bin/bash -g www www
 
 # Set proper permissions
-RUN chown -R www:www /var/www
-
-# Switch to non-root user
-USER www
+RUN chown -R www:www /var/www && \
+    chmod -R 775 /var/www/storage && \
+    chmod -R 775 /var/www/bootstrap/cache
 
 # Change the default command to run the entrypoint script
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+
+# Switch to non-root user (this will be done in the entrypoint script)
+# USER www
 
 # Expose port 9000 and start php-fpm server
 EXPOSE 9000
