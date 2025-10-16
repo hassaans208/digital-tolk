@@ -56,11 +56,21 @@ class TranslationExportTest extends TestCase
 
         // Assert: Correct structure and content
         $response->assertOk();
+        $response->assertJsonStructure([
+            'status',
+            'message', 
+            'data'
+        ]);
+        
         $responseData = $response->json('data');
         
         // Debug: Check what we got
         $this->assertIsArray($responseData, 'Response data should be an array');
         $this->assertNotEmpty($responseData, 'Response data should not be empty');
+        
+        // Check that data contains key-value pairs (not nested structure)
+        $this->assertIsString(array_keys($responseData)[0], 'Keys should be strings');
+        $this->assertIsString(array_values($responseData)[0], 'Values should be strings');
         
     }
 
@@ -84,6 +94,11 @@ class TranslationExportTest extends TestCase
         // Assert: Only English translations are returned
         $response->assertOk();
         $responseData = $response->json('data');
+        
+        // All keys should start with 'en.'
+        foreach (array_keys($responseData) as $key) {
+            $this->assertStringStartsWith('en.', $key, "Key '{$key}' should start with 'en.'");
+        }
     }
 
     /**
@@ -114,8 +129,13 @@ class TranslationExportTest extends TestCase
         $response = $this->getJson('/api/v1/translations/export');
 
         // Assert: Validation error
-        $response->assertUnprocessable();
-        $response->assertJsonValidationErrors(['locale']);
+        $response->assertStatus(422);
+        $response->assertJsonStructure([
+            'message',
+            'errors' => [
+                'locale'
+            ]
+        ]);
     }
 
     /**
@@ -130,8 +150,13 @@ class TranslationExportTest extends TestCase
         $response = $this->getJson('/api/v1/translations/export?locale=');
 
         // Assert: Validation error
-        $response->assertUnprocessable();
-        $response->assertJsonValidationErrors(['locale']);
+        $response->assertStatus(422);
+        $response->assertJsonStructure([
+            'message',
+            'errors' => [
+                'locale'
+            ]
+        ]);
     }
 
     /**
@@ -147,6 +172,11 @@ class TranslationExportTest extends TestCase
 
         // Assert: Empty array returned
         $response->assertOk();
+        $response->assertJsonStructure([
+            'status',
+            'message',
+            'data'
+        ]);
         $responseData = $response->json('data');
         $this->assertEmpty($responseData);
     }
@@ -168,7 +198,11 @@ class TranslationExportTest extends TestCase
         // Assert: Both responses are identical (cached)
         $firstResponse->assertOk();
         $secondResponse->assertOk();
-        $this->assertEquals($firstResponse->json('data'), $secondResponse->json('data'));
+        
+        $firstData = $firstResponse->json('data');
+        $secondData = $secondResponse->json('data');
+        
+        $this->assertEquals($firstData, $secondData);
     }
 
     // Helper methods for creating test data
@@ -208,7 +242,6 @@ class TranslationExportTest extends TestCase
     private function createTestTranslations(Language $language): void
     {
         Translation::create([
-            'key' => 'en.welcome_message',
             'content' => 'Welcome to our application',
             'locale' => $language->code,
             'language_id' => $language->id,
@@ -216,7 +249,6 @@ class TranslationExportTest extends TestCase
         ]);
 
         Translation::create([
-            'key' => 'en.user_profile',
             'content' => 'User Profile',
             'locale' => $language->code,
             'language_id' => $language->id,
@@ -224,7 +256,6 @@ class TranslationExportTest extends TestCase
         ]);
 
         Translation::create([
-            'key' => 'en.auth_login',
             'content' => 'Login to your account',
             'locale' => $language->code,
             'language_id' => $language->id,
@@ -235,7 +266,6 @@ class TranslationExportTest extends TestCase
     private function createEnglishTranslations(Language $language): void
     {
         Translation::create([
-            'key' => 'en.welcome_message',
             'content' => 'Welcome to our application',
             'locale' => $language->code,
             'language_id' => $language->id,
@@ -243,7 +273,6 @@ class TranslationExportTest extends TestCase
         ]);
 
         Translation::create([
-            'key' => 'en.user_profile',
             'content' => 'User Profile',
             'locale' => $language->code,
             'language_id' => $language->id,
@@ -254,7 +283,6 @@ class TranslationExportTest extends TestCase
     private function createFrenchTranslations(Language $language): void
     {
         Translation::create([
-            'key' => 'fr.bienvenue_message',
             'content' => 'Bienvenue dans notre application',
             'locale' => $language->code,
             'language_id' => $language->id,

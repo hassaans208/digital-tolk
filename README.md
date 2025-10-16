@@ -6,7 +6,7 @@ Build a scalable, secure, and high-performance Translation Management API to dem
 ### Test Overview
 Develop a backend service to manage translations across multiple locales (e.g., en, fr, es), with flexible support for new languages. Each translation can be tagged by context (mobile, desktop, web) and must be easily searchable by tag, key, or content.
 
-### Setup
+### Quick Setup
 
 > **Prerequisite:**  
 > Ensure [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/) are installed on your machine.  
@@ -19,64 +19,60 @@ Develop a backend service to manage translations across multiple locales (e.g., 
    cd digital-tolk
    ```
 
-2. **Configure environment variables:**
+2. **Copy Environment File**
 
-   - Copy the example environment file:
+    Copy the example environment file:
      ```bash
      cp .env.example .env
      ```
-   - (Optional) Edit `.env` and set your required configuration values if needed.
 
 3. **Build and start the Docker containers:**
 
    ```bash
-   docker compose -f compose.prod.yaml up --build -d
+   docker compose -f compose.prod.yaml up -d
    ```
 
-4. **Install Composer dependencies:**
+4. **Wait Until PHP-FPM is ready:**
 
-   ```bash
-   docker compose exec app composer install
+   Once you see following script in fpm logs, you will know it that the app is ready:
+
+   ```
+   Setting up storage directories...
+   Waiting for database connection...
+   Database is ready!
+   Running database migrations...
+
+   Dropping all tables ................................................ 1s DONE
+   INFO  Preparing database.  
+   Creating migration table ...................................... 71.90ms DONE
+   INFO  Running migrations.  
+   0001_01_01_000000_create_users_table ......................... 238.79ms DONE
+   0001_01_01_000001_create_cache_table .......................... 89.77ms DONE
+   0001_01_01_000002_create_jobs_table .......................... 205.25ms DONE
+   2025_10_15_112724_create_tags_table ........................... 96.86ms DONE
+   2025_10_15_112800_create_languages_table ..................... 142.78ms DONE
+   2025_10_15_112907_create_translations_table ............. -167,765.56ms DONE
+   2025_10_15_123352_create_personal_access_tokens_table .......... 2m 48s DONE
+   2025_10_15_130100_create_translation_tag_table ............... 344.93ms DONE
+
+   INFO  Seeding database.  
+
+   Database\Seeders\TranslationSeeder ................................. RUNNING  
+   Translation seeding done.
+   Database\Seeders\TranslationSeeder .......................... 34,823 ms DONE  
+
+   Migrations completed successfully
+   Laravel application setup completed!
+   [15-Oct-2025 23:25:01] NOTICE: fpm is running, pid 1
+   [15-Oct-2025 23:25:01] NOTICE: ready to handle connections
    ```
 
-5. **Generate application key:**
+5. **Discover Swagger Documentation:**
 
-   ```bash
-   docker compose exec app php artisan key:generate
-   ```
+   [Swagger Documentation (Click here)](http://localhost/docs)
 
-6. **Run migrations and seeders:**
 
-   ```bash
-   docker compose exec app php artisan migrate --seed
-   ```
-
-   This will prepare your database with required tables and optional sample data.
-
-7. **(Optional) Generate test records for scalability testing:**
-
-   ```bash
-   docker compose exec app php artisan db:seed --class=TranslationSeeder
-   ```
-
-   *(Only if you wish to generate 100k+ records; see documentation for custom seeders or factories.)*
-
-8. **Build the Swagger (Scribe) API documentation:**
-
-   Build the API docs using the knuckleswtf/scribe library:
-
-   ```bash
-   docker compose exec app php artisan scribe:generate
-   ```
-
-9. **Access the application:**
-
-   - **API base URL:**  
-     [http://localhost](http://localhost:8000)
-   - **API Documentation:**  
-     [http://localhost/docs](http://localhost:8000/docs)
-
-10. **Postman Testing:**
+6. **Postman Testing:**
 
     To test API endpoints in Postman, import the Postman collection located at:
 
@@ -88,26 +84,30 @@ Develop a backend service to manage translations across multiple locales (e.g., 
     - Open Postman and choose `Import` > `File`
     - Select the file above to load all API requests.
 
-11. **Shutting down the stack:**
+6. **Run Tests:**
+
+   Run tests using following command:
+
+    ```
+    docker exec digital-tolk-php-cli-1 php artisan test tests/Feature/TranslationExportTest.php
+    ```
+
+   Incase you encounter issue with running tests, please use following command:
+    ```
+    docker exec digital-tolk-php-fpm-1 composer install
+    ```
+
+   In Postman:  
+    - Open Postman and choose `Import` > `File`
+    - Select the file above to load all API requests.
+
+7. **Shutting down the stack:**
 
     When done, you can stop the containers with:
 
     ```bash
     docker compose -f compose.prod.yaml down
     ```
-
-**If you encounter permission issues (Linux/Mac), you may need to fix file or storage permissions:**
-
-```bash
-docker compose exec app chmod -R ug+w storage bootstrap/cache
-```
-
-
-- Documentation URL
-
-Access documentation [http://localhost/docs]
-
-- 
 
 ### Requirements Summary
 

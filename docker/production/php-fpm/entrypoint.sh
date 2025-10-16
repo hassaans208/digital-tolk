@@ -56,6 +56,7 @@ create_storage_link() {
     
     chown -R www:www /var/www/storage
     chmod -R 777 /var/www/storage
+    chmod -R 777 /var/www/storage/logs/laravel.log
     chmod -R 777 /var/www/bootstrap/cache
     
     chmod -R 777 /var/www/storage/framework/views
