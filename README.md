@@ -84,6 +84,10 @@ Develop a backend service to manage translations across multiple locales (e.g., 
     - Open Postman and choose `Import` > `File`
     - Select the file above to load all API requests.
 
+    ## Use APIs
+
+    The data has already been seeded feel free to call APIs and test them
+
 6. **Run Tests:**
 
    Run tests using following command:
