@@ -98,7 +98,7 @@ Develop a backend service to manage translations across multiple locales (e.g., 
 
    Incase you encounter issue with running tests, please use following command:
     ```
-    docker exec digital-tolk-php-fpm-1 composer install
+    docker exec digital-tolk-php-cli-1 composer install # corrected command, I was installing in fpm instead of cli :(
     ```
 
    In Postman:  
